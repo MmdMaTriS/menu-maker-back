@@ -8,37 +8,48 @@ datasource db {
 }
 
 model Users {
-  id         String  @id @default(uuid())
-  first_name String  @db.VarChar(50)
-  last_name  String  @db.VarChar(100)
-  mobile     String  @unique
-  email      String?
+  id                String         @id @default(uuid())
+  first_name        String         @db.VarChar(50)
+  last_name         String         @db.VarChar(100)
+  mobile            String         @unique
+  email             String?
+  created_at        DateTime       @default(now())
+  updated_at        DateTime       @updatedAt
+  logged_in_devices LoginDevices[]
 }
 
 model Ventors {
-  id         String  @id @default(uuid())
-  first_name String  @db.VarChar(50)
-  last_name  String  @db.VarChar(100)
-  Store      Store[]
+  id                String         @id @default(uuid())
+  first_name        String         @db.VarChar(50)
+  last_name         String         @db.VarChar(100)
+  Store             Store[]
+  created_at        DateTime       @default(now())
+  updated_at        DateTime       @updatedAt
+  logged_in_devices LoginDevices[]
 }
 
 model Admins {
-  id         String @id @default(uuid())
-  first_name String @db.VarChar(50)
-  last_name  String @db.VarChar(100)
-  mobile     String @unique
+  id                String         @id @default(uuid())
+  first_name        String         @db.VarChar(50)
+  last_name         String         @db.VarChar(100)
+  mobile            String         @unique
+  created_at        DateTime       @default(now())
+  updated_at        DateTime       @updatedAt
+  logged_in_devices LoginDevices[]
 }
 
 model Store {
-  id        Int        @id @default(autoincrement())
-  name      String
-  address   String?
-  zip_code  String?
-  latitude  Float?
-  longitude Float?
-  ventor    Ventors    @relation(fields: [ventor_id], references: [id])
-  ventor_id String
-  items     ShopItem[]
+  id         Int        @id @default(autoincrement())
+  name       String
+  address    String?
+  zip_code   String?
+  latitude   Float?
+  longitude  Float?
+  ventor     Ventors    @relation(fields: [ventor_id], references: [id])
+  ventor_id  String
+  items      ShopItem[]
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
 }
 
 model ShopItem {
@@ -51,10 +62,44 @@ model ShopItem {
   price_format     String
   Store            Store?           @relation(fields: [storeId], references: [id])
   storeId          Int?
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @updatedAt
 }
 
 model ShopItemCategory {
-  id    Int        @id @default(autoincrement())
-  name  String
-  items ShopItem[]
+  id         Int        @id @default(autoincrement())
+  name       String
+  items      ShopItem[]
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+}
+
+model Images {
+  id             Int      @id @default(autoincrement())
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+  //uploaded by and for which shop
+  mime_type      String
+  name           String   @default("")
+  description    String   @default("")
+  image_key      String
+  thumbnail_path String
+  medium_path    String
+  orginal_path   String
+}
+
+model LoginDevices {
+  id           Int      @id @default(autoincrement())
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  expired_at   DateTime
+  access_token String
+  ip_address   String
+  user_agent   String
+  user_id      String?
+  user         Users?   @relation(fields: [user_id], references: [id])
+  ventor_id    String?
+  Ventor       Ventors? @relation(fields: [ventor_id], references: [id])
+  admin_id     String?
+  admin        Admins?  @relation(fields: [admin_id], references: [id])
 }
