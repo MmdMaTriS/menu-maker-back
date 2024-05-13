@@ -16,20 +16,28 @@ model Users {
   created_at        DateTime       @default(now())
   updated_at        DateTime       @updatedAt
   logged_in_devices LoginDevices[]
+  store_subscribes  Store[]
+  status            UserStatusEnum @default(ACTIVE)
+  suspend_list      SuspendList[]
 }
 
 model Ventors {
-  id                String         @id @default(uuid())
-  first_name        String         @db.VarChar(50)
-  last_name         String         @db.VarChar(100)
+  id                String           @id @default(uuid())
+  created_at        DateTime         @default(now())
+  updated_at        DateTime         @updatedAt
+  first_name        String           @db.VarChar(50)
+  last_name         String           @db.VarChar(100)
+  mobile            String
+  email             String?
+  status            VentorStatusEnum @default(DISABLED)
   Store             Store[]
-  created_at        DateTime       @default(now())
-  updated_at        DateTime       @updatedAt
   logged_in_devices LoginDevices[]
+  suspend_list      SuspendList[]
 }
 
 model Admins {
   id                String         @id @default(uuid())
+  role              AdminRoleEnum
   first_name        String         @db.VarChar(50)
   last_name         String         @db.VarChar(100)
   mobile            String         @unique
@@ -39,31 +47,60 @@ model Admins {
 }
 
 model Store {
-  id         Int        @id @default(autoincrement())
-  name       String
-  address    String?
-  zip_code   String?
-  latitude   Float?
-  longitude  Float?
-  ventor     Ventors    @relation(fields: [ventor_id], references: [id])
-  ventor_id  String
-  items      ShopItem[]
-  created_at DateTime   @default(now())
-  updated_at DateTime   @updatedAt
+  id              Int             @id @default(autoincrement())
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
+  open_at         DateTime?
+  close_at        DateTime?
+  name            String
+  address         String?
+  zip_code        String?
+  phone           String[]
+  latitude        Float?
+  longitude       Float?
+  ventor          Ventors         @relation(fields: [ventor_id], references: [id])
+  ventor_id       String
+  items           ShopItem[]
+  status          StoreStatusEnum @default(PENDING)
+  imagesId        Int?
+  store_type      String?
+  subscribe_users Users[]
 }
 
 model ShopItem {
-  id               Int              @id @default(autoincrement())
+  id               Int                @id @default(autoincrement())
+  created_at       DateTime           @default(now())
+  updated_at       DateTime           @updatedAt
   category_id      Int
-  category         ShopItemCategory @relation(fields: [category_id], references: [id])
+  category         ShopItemCategory   @relation(fields: [category_id], references: [id])
   name             String
+  description      String?
   preparation_time Float?
   price            Float?
   price_format     String
-  Store            Store?           @relation(fields: [storeId], references: [id])
+  Store            Store?             @relation(fields: [storeId], references: [id])
   storeId          Int?
-  created_at       DateTime         @default(now())
-  updated_at       DateTime         @updatedAt
+  images           ShopItemImages[]
+  remaining        Int?
+  status           ShopItemStatusEnum
+  discount         Int?
+  toppings         ShopItemTopping[]
+}
+
+model ShopItemTopping {
+  id           Int                @id @default(autoincrement())
+  created_at   DateTime           @default(now())
+  updated_at   DateTime           @updatedAt
+  shop_item    ShopItem           @relation(fields: [shop_item_id], references: [id])
+  shop_item_id Int
+  name         String
+  description  String
+  price        Float
+  price_format String
+  discount     Int?
+  remaining    Int?
+  status       ShopItemStatusEnum
+  images       ShopItemImages[]
 }
 
 model ShopItemCategory {
@@ -74,18 +111,22 @@ model ShopItemCategory {
   updated_at DateTime   @updatedAt
 }
 
-model Images {
-  id             Int      @id @default(autoincrement())
-  created_at     DateTime @default(now())
-  updated_at     DateTime @updatedAt
-  //uploaded by and for which shop
-  mime_type      String
-  name           String   @default("")
-  description    String   @default("")
-  image_key      String
-  thumbnail_path String
-  medium_path    String
-  orginal_path   String
+model ShopItemImages {
+  id                   Int              @id @default(autoincrement())
+  created_at           DateTime         @default(now())
+  updated_at           DateTime         @updatedAt
+  mime_type            String
+  name                 String           @default("")
+  description          String           @default("")
+  image_key            String
+  thumbnail_path       String
+  medium_path          String
+  orginal_path         String
+  uploaded_by_id       String
+  shop_item            ShopItem?        @relation(fields: [shop_item_id], references: [id])
+  shop_item_id         Int?
+  shop_item_topping    ShopItemTopping? @relation(fields: [shop_item_topping_id], references: [id])
+  shop_item_topping_id Int?
 }
 
 model LoginDevices {
@@ -102,4 +143,48 @@ model LoginDevices {
   Ventor       Ventors? @relation(fields: [ventor_id], references: [id])
   admin_id     String?
   admin        Admins?  @relation(fields: [admin_id], references: [id])
+}
+
+model SuspendList {
+  id                Int       @id @default(autoincrement())
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+  reason            String
+  unsuspend_at      DateTime?
+  user_suspend      Users?    @relation(fields: [user_suspend_id], references: [id])
+  user_suspend_id   String?
+  ventor_suspend    Ventors?  @relation(fields: [ventor_suspend_id], references: [id])
+  ventor_suspend_id String?
+}
+
+enum VentorStatusEnum {
+  ACTIVE
+  DISABLED
+  SUSPEND
+}
+
+enum UserStatusEnum {
+  ACTIVE
+  DISABLED
+  SUSPEND
+}
+
+enum StoreStatusEnum {
+  PENDING
+  ACTIVE
+  DISABLED
+  SUSPEND
+}
+
+enum ShopItemStatusEnum {
+  PENDING
+  ACTIVE
+  DISABLED
+  ENDED
+}
+
+enum AdminRoleEnum {
+  MANAGER
+  ADMIN
+  SUPPORT
 }
