@@ -15,10 +15,11 @@ model Users {
   email      String?
 }
 
-model Owners {
-  id         String @id @default(uuid())
-  first_name String @db.VarChar(50)
-  last_name  String @db.VarChar(100)
+model Ventors {
+  id         String  @id @default(uuid())
+  first_name String  @db.VarChar(50)
+  last_name  String  @db.VarChar(100)
+  Store      Store[]
 }
 
 model Admins {
@@ -26,4 +27,34 @@ model Admins {
   first_name String @db.VarChar(50)
   last_name  String @db.VarChar(100)
   mobile     String @unique
+}
+
+model Store {
+  id        Int        @id @default(autoincrement())
+  name      String
+  address   String?
+  zip_code  String?
+  latitude  Float?
+  longitude Float?
+  ventor    Ventors    @relation(fields: [ventor_id], references: [id])
+  ventor_id String
+  items     ShopItem[]
+}
+
+model ShopItem {
+  id               Int              @id @default(autoincrement())
+  category_id      Int
+  category         ShopItemCategory @relation(fields: [category_id], references: [id])
+  name             String
+  preparation_time Float?
+  price            Float?
+  price_format     String
+  Store            Store?           @relation(fields: [storeId], references: [id])
+  storeId          Int?
+}
+
+model ShopItemCategory {
+  id    Int        @id @default(autoincrement())
+  name  String
+  items ShopItem[]
 }
