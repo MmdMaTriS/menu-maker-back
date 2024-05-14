@@ -29,6 +29,7 @@ model Ventors {
   last_name         String           @db.VarChar(100)
   mobile            String
   email             String?
+  national_id       String?
   status            VentorStatusEnum @default(DISABLED)
   Store             Store[]
   logged_in_devices LoginDevices[]
