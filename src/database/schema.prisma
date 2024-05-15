@@ -12,6 +12,7 @@ model Users {
   first_name        String         @db.VarChar(50)
   last_name         String         @db.VarChar(100)
   mobile            String         @unique
+  password          String
   email             String?
   created_at        DateTime       @default(now())
   updated_at        DateTime       @updatedAt
@@ -28,6 +29,7 @@ model Ventors {
   first_name        String           @db.VarChar(50)
   last_name         String           @db.VarChar(100)
   mobile            String
+  password          String
   email             String?
   national_id       String?
   status            VentorStatusEnum @default(DISABLED)
@@ -42,6 +44,7 @@ model Admins {
   first_name        String         @db.VarChar(50)
   last_name         String         @db.VarChar(100)
   mobile            String         @unique
+  password          String
   created_at        DateTime       @default(now())
   updated_at        DateTime       @updatedAt
   logged_in_devices LoginDevices[]
@@ -156,6 +159,16 @@ model SuspendList {
   user_suspend_id   String?
   ventor_suspend    Ventors?  @relation(fields: [ventor_suspend_id], references: [id])
   ventor_suspend_id String?
+}
+
+model OTPList {
+  id          Int      @id @default(autoincrement())
+  created_at  DateTime @default(now())
+  code        String
+  mobile      String
+  ip_address  String
+  user_agent  String
+  description String?
 }
 
 enum VentorStatusEnum {

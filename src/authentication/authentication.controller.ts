@@ -1,6 +1,7 @@
-import { Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { ApiTags } from '@nestjs/swagger';
+import { LoginDTO } from './dto/authentication.dto';
 
 // User's can login with `one time code`
 @ApiTags('Authentication Routes')
@@ -8,17 +9,17 @@ import { ApiTags } from '@nestjs/swagger';
 export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
   @Post('/login/user')
-  userLogin() {
+  userLogin(@Body() body: LoginDTO) {
     return this.authenticationService.userLogin();
   }
 
   @Post('/login/ventor')
-  ventorLogin() {
+  ventorLogin(@Body() body: LoginDTO) {
     return this.authenticationService.ventorLogin();
   }
 
   @Post('/login/admin')
-  adminLogin() {
+  adminLogin(@Body() body: LoginDTO) {
     return this.authenticationService.adminLogin();
   }
 
