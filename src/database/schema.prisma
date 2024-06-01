@@ -8,46 +8,43 @@ datasource db {
 }
 
 model Users {
-  id                String         @id @default(uuid())
-  first_name        String         @db.VarChar(50)
-  last_name         String         @db.VarChar(100)
-  mobile            String         @unique
-  password          String
-  email             String?
-  created_at        DateTime       @default(now())
-  updated_at        DateTime       @updatedAt
-  logged_in_devices LoginDevices[]
-  store_subscribes  Store[]
-  status            UserStatusEnum @default(ACTIVE)
-  suspend_list      SuspendList[]
+  id               String         @id @default(uuid())
+  first_name       String         @db.VarChar(50)
+  last_name        String         @db.VarChar(100)
+  mobile           String         @unique
+  password         String
+  email            String?
+  created_at       DateTime       @default(now())
+  updated_at       DateTime       @updatedAt
+  store_subscribes Store[]
+  status           UserStatusEnum @default(ACTIVE)
+  suspend_list     SuspendList[]
 }
 
 model Ventors {
-  id                String           @id @default(uuid())
-  created_at        DateTime         @default(now())
-  updated_at        DateTime         @updatedAt
-  first_name        String           @db.VarChar(50)
-  last_name         String           @db.VarChar(100)
-  mobile            String
-  password          String
-  email             String?
-  national_id       String?
-  status            VentorStatusEnum @default(DISABLED)
-  Store             Store[]
-  logged_in_devices LoginDevices[]
-  suspend_list      SuspendList[]
+  id           String           @id @default(uuid())
+  created_at   DateTime         @default(now())
+  updated_at   DateTime         @updatedAt
+  first_name   String           @db.VarChar(50)
+  last_name    String           @db.VarChar(100)
+  mobile       String
+  password     String
+  email        String?
+  national_id  String?
+  status       VentorStatusEnum @default(DISABLED)
+  Store        Store[]
+  suspend_list SuspendList[]
 }
 
 model Admins {
-  id                String         @id @default(uuid())
-  role              AdminRoleEnum
-  first_name        String         @db.VarChar(50)
-  last_name         String         @db.VarChar(100)
-  mobile            String         @unique
-  password          String
-  created_at        DateTime       @default(now())
-  updated_at        DateTime       @updatedAt
-  logged_in_devices LoginDevices[]
+  id         String        @id @default(uuid())
+  role       AdminRoleEnum
+  first_name String        @db.VarChar(50)
+  last_name  String        @db.VarChar(100)
+  mobile     String        @unique
+  password   String
+  created_at DateTime      @default(now())
+  updated_at DateTime      @updatedAt
 }
 
 model Store {
@@ -142,11 +139,6 @@ model LoginDevices {
   ip_address   String
   user_agent   String
   user_id      String?
-  user         Users?   @relation(fields: [user_id], references: [id])
-  ventor_id    String?
-  Ventor       Ventors? @relation(fields: [ventor_id], references: [id])
-  admin_id     String?
-  admin        Admins?  @relation(fields: [admin_id], references: [id])
 }
 
 model SuspendList {

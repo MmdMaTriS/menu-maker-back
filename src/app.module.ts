@@ -7,12 +7,18 @@ import { AuthenticationModule } from './authentication/authentication.module';
 import { GlobalModule } from './global/global.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
       serveRoot: '/public',
+    }),
+    JwtModule.register({
+      global: true,
+      secret: process.env.JWT_SECRET_KEY,
+      signOptions: { expiresIn: '30d' },
     }),
     UsersModule,
     VentorsModule,
