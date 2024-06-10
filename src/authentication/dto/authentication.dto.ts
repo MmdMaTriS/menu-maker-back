@@ -1,8 +1,10 @@
 import { PickType, IntersectionType, PartialType } from '@nestjs/swagger';
-import { IsString, Length } from 'class-validator';
+import { IsMobilePhone, IsString, Length } from 'class-validator';
 
 export class UserMobileDTO {
-  @IsString()
+  @IsMobilePhone('fa-IR', undefined, {
+    message: 'شماره موبایل بع درستی وارد نشده است',
+  })
   @Length(10, 13, { message: 'شماره موبایل به درستی وارد نشده است' })
   mobile: string;
 }

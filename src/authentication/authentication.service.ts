@@ -9,18 +9,21 @@ import { UsersService } from 'src/users/users.service';
 import { LoginDTO } from './dto/authentication.dto';
 import { checkExpiredTime } from 'src/common/utilities/date.utils';
 import { JwtService } from '@nestjs/jwt';
+import { VendorsService } from 'src/vendors/vendors.service';
 
 @Injectable()
 export class AuthenticationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly usersSerivce: UsersService,
+    private readonly vendorsService: VendorsService,
     private readonly jwtService: JwtService,
   ) {}
   // -> user's can login with 2 options.
   // -> With OTP or with Password, and one of them is REQUIRED
   async userLogin(fields: LoginDTO, ip: string, userAgent: string) {
     const { mobile, password, otp } = fields;
+    //password is-optional here
     const user = await this.usersSerivce.findUser(mobile, password);
     if (!user)
       throw new NotFoundException(
@@ -35,13 +38,28 @@ export class AuthenticationService {
     throw new BadRequestException();
   }
 
-  async ventorLogin() {}
+  async vendorLogin(fields: LoginDTO, ip: string, userAgent: string) {
+    const { mobile, password, otp } = fields;
+    //password is-optional here
+    const vendor = await this.vendorsService.findVendor(mobile, password);
+    if (!vendor)
+      throw new NotFoundException(
+        `حساب کاربری شما یافت نشد, ورودی ها را بررسی کنید`,
+      );
+    if (otp) {
+      await this.validateWithOTP(mobile, otp);
+      return this.createUserTokens(vendor.id, ip, userAgent);
+    } else if (password) {
+      return this.createUserTokens(vendor.id, ip, userAgent);
+    }
+    throw new BadRequestException();
+  }
 
   async adminLogin() {}
 
   async registerUser() {}
 
-  async registerVentor() {}
+  async registerVendor() {}
 
   async reconveryUser() {}
 
@@ -68,10 +86,11 @@ export class AuthenticationService {
     userId: string,
     ip_address: string,
     user_agent: string,
+    daysToExpire: number = 30,
   ) {
     try {
       const expired_at = new Date();
-      expired_at.setDate(expired_at.getDate() + 30);
+      expired_at.setDate(expired_at.getDate() + daysToExpire);
       const access_token = await this.jwtService.signAsync({ id: userId });
       await this.prisma.loginDevices.create({
         data: {

@@ -1,8 +1,8 @@
-import { Body, Controller, Ip, Post, Req } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { ApiTags } from '@nestjs/swagger';
 import { LoginDTO } from './dto/authentication.dto';
-import { Request } from 'express';
+import { UserDevice, UserDeviceType } from 'src/common/decorators/UserDevice';
 
 // User's can login with `one time code`
 @ApiTags('Authentication Routes')
@@ -10,14 +10,24 @@ import { Request } from 'express';
 export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
   @Post('/login/user')
-  userLogin(@Body() body: LoginDTO, @Ip() ip: string, @Req() req: Request) {
-    const userAgent = req.headers['user-agent'];
-    return this.authenticationService.userLogin(body, ip, userAgent);
+  userLogin(@Body() body: LoginDTO, @UserDevice() userDevice: UserDeviceType) {
+    return this.authenticationService.userLogin(
+      body,
+      userDevice.ip,
+      userDevice.userAgent,
+    );
   }
 
-  @Post('/login/ventor')
-  ventorLogin(@Body() body: LoginDTO) {
-    return this.authenticationService.ventorLogin();
+  @Post('/login/vendor')
+  vendorLogin(
+    @Body() body: LoginDTO,
+    @UserDevice() userDevice: UserDeviceType,
+  ) {
+    return this.authenticationService.vendorLogin(
+      body,
+      userDevice.ip,
+      userDevice.userAgent,
+    );
   }
 
   @Post('/login/admin')
@@ -31,8 +41,8 @@ export class AuthenticationController {
   }
 
   @Post('/register/ventor')
-  registerVentor() {
-    return this.authenticationService.registerVentor();
+  registerVendor() {
+    return this.authenticationService.registerVendor();
   }
 
   @Post('/recovery/user')

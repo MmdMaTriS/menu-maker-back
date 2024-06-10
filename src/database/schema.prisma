@@ -12,26 +12,26 @@ model Users {
   first_name       String         @db.VarChar(50)
   last_name        String         @db.VarChar(100)
   mobile           String         @unique
-  password         String
   email            String?
   created_at       DateTime       @default(now())
   updated_at       DateTime       @updatedAt
-  store_subscribes Store[]
   status           UserStatusEnum @default(ACTIVE)
+  password         String
   suspend_list     SuspendList[]
+  store_subscribes Store[]        @relation("StoreToUsers")
 }
 
-model Ventors {
+model Vendors {
   id           String           @id @default(uuid())
   created_at   DateTime         @default(now())
   updated_at   DateTime         @updatedAt
   first_name   String           @db.VarChar(50)
   last_name    String           @db.VarChar(100)
-  mobile       String
+  mobile       String           @unique
   password     String
   email        String?
   national_id  String?
-  status       VentorStatusEnum @default(DISABLED)
+  status       VendorStatusEnum @default(DISABLED)
   Store        Store[]
   suspend_list SuspendList[]
 }
@@ -42,9 +42,9 @@ model Admins {
   first_name String        @db.VarChar(50)
   last_name  String        @db.VarChar(100)
   mobile     String        @unique
-  password   String
   created_at DateTime      @default(now())
   updated_at DateTime      @updatedAt
+  password   String
 }
 
 model Store {
@@ -59,13 +59,13 @@ model Store {
   phone           String[]
   latitude        Float?
   longitude       Float?
-  ventor          Ventors         @relation(fields: [ventor_id], references: [id])
   ventor_id       String
-  items           ShopItem[]
   status          StoreStatusEnum @default(PENDING)
   imagesId        Int?
   store_type      String?
-  subscribe_users Users[]
+  items           ShopItem[]
+  ventor          Vendors         @relation(fields: [ventor_id], references: [id])
+  subscribe_users Users[]         @relation("StoreToUsers")
 }
 
 model ShopItem {
@@ -73,18 +73,18 @@ model ShopItem {
   created_at       DateTime           @default(now())
   updated_at       DateTime           @updatedAt
   category_id      Int
-  category         ShopItemCategory   @relation(fields: [category_id], references: [id])
   name             String
   description      String?
   preparation_time Float?
   price            Float?
   price_format     String
-  Store            Store?             @relation(fields: [storeId], references: [id])
   storeId          Int?
-  images           ShopItemImages[]
   remaining        Int?
   status           ShopItemStatusEnum
   discount         Int?
+  category         ShopItemCategory   @relation(fields: [category_id], references: [id])
+  Store            Store?             @relation(fields: [storeId], references: [id])
+  images           ShopItemImages[]
   toppings         ShopItemTopping[]
 }
 
@@ -92,7 +92,6 @@ model ShopItemTopping {
   id           Int                @id @default(autoincrement())
   created_at   DateTime           @default(now())
   updated_at   DateTime           @updatedAt
-  shop_item    ShopItem           @relation(fields: [shop_item_id], references: [id])
   shop_item_id Int
   name         String
   description  String
@@ -102,14 +101,15 @@ model ShopItemTopping {
   remaining    Int?
   status       ShopItemStatusEnum
   images       ShopItemImages[]
+  shop_item    ShopItem           @relation(fields: [shop_item_id], references: [id])
 }
 
 model ShopItemCategory {
   id         Int        @id @default(autoincrement())
   name       String
-  items      ShopItem[]
   created_at DateTime   @default(now())
   updated_at DateTime   @updatedAt
+  items      ShopItem[]
 }
 
 model ShopItemImages {
@@ -124,10 +124,10 @@ model ShopItemImages {
   medium_path          String
   orginal_path         String
   uploaded_by_id       String
-  shop_item            ShopItem?        @relation(fields: [shop_item_id], references: [id])
   shop_item_id         Int?
-  shop_item_topping    ShopItemTopping? @relation(fields: [shop_item_topping_id], references: [id])
   shop_item_topping_id Int?
+  shop_item            ShopItem?        @relation(fields: [shop_item_id], references: [id])
+  shop_item_topping    ShopItemTopping? @relation(fields: [shop_item_topping_id], references: [id])
 }
 
 model LoginDevices {
@@ -147,10 +147,10 @@ model SuspendList {
   updated_at        DateTime  @updatedAt
   reason            String
   unsuspend_at      DateTime?
-  user_suspend      Users?    @relation(fields: [user_suspend_id], references: [id])
   user_suspend_id   String?
-  ventor_suspend    Ventors?  @relation(fields: [ventor_suspend_id], references: [id])
   ventor_suspend_id String?
+  user_suspend      Users?    @relation(fields: [user_suspend_id], references: [id])
+  ventor_suspend    Vendors?  @relation(fields: [ventor_suspend_id], references: [id])
 }
 
 model OTPList {
@@ -163,7 +163,7 @@ model OTPList {
   description String?
 }
 
-enum VentorStatusEnum {
+enum VendorStatusEnum {
   ACTIVE
   DISABLED
   SUSPEND
