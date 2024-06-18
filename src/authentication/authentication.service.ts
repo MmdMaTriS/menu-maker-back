@@ -10,6 +10,7 @@ import { LoginDTO } from './dto/authentication.dto';
 import { checkExpiredTime } from 'src/common/utilities/date.utils';
 import { JwtService } from '@nestjs/jwt';
 import { VendorsService } from 'src/vendors/vendors.service';
+import { AdminsService } from 'src/admins/admins.service';
 
 @Injectable()
 export class AuthenticationService {
@@ -17,6 +18,7 @@ export class AuthenticationService {
     private readonly prisma: PrismaService,
     private readonly usersSerivce: UsersService,
     private readonly vendorsService: VendorsService,
+    private readonly adminsSerivce: AdminsService,
     private readonly jwtService: JwtService,
   ) {}
   // -> user's can login with 2 options.
@@ -55,7 +57,22 @@ export class AuthenticationService {
     throw new BadRequestException();
   }
 
-  async adminLogin() {}
+  async adminLogin(fields: LoginDTO, ip: string, userAgent: string) {
+    const { mobile, password, otp } = fields;
+    //password is-optional here
+    const admin = await this.adminsSerivce.findAdmin(mobile, password);
+    if (!admin)
+      throw new NotFoundException(
+        `حساب کاربری شما یافت نشد, ورودی ها را بررسی کنید`,
+      );
+    if (otp) {
+      await this.validateWithOTP(mobile, otp);
+      return this.createUserTokens(admin.id, ip, userAgent);
+    } else if (password) {
+      return this.createUserTokens(admin.id, ip, userAgent);
+    }
+    throw new BadRequestException();
+  }
 
   async registerUser() {}
 

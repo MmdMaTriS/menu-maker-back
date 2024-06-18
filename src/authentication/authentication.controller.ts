@@ -31,8 +31,12 @@ export class AuthenticationController {
   }
 
   @Post('/login/admin')
-  adminLogin(@Body() body: LoginDTO) {
-    return this.authenticationService.adminLogin();
+  adminLogin(@Body() body: LoginDTO, @UserDevice() userDevice: UserDeviceType) {
+    return this.authenticationService.adminLogin(
+      body,
+      userDevice.ip,
+      userDevice.userAgent,
+    );
   }
 
   @Post('/register/user')
